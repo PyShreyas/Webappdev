@@ -138,6 +138,12 @@ from flask_wtf.csrf import CSRFError
 def handle_csrf_error(e):
     return render_template('csrf_error.html', reason=e.description), 400
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("You've logged out successfully. See you!")
+    return redirect('/login')
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
