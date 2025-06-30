@@ -6,6 +6,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import re
 import os
 import random
+from forms import LoginForm  # Make sure forms.py exists
+
+from flask_wtf.csrf import CSRFError
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -13,6 +16,8 @@ app.secret_key = os.urandom(24)
 DB_NAME = 'database.db'
 OTP_STORE = {}  # Temporarily stores OTPs
 
+
+# Initialize the database
 def init_db():
     with sqlite3.connect(DB_NAME) as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -21,10 +26,14 @@ def init_db():
                             email TEXT UNIQUE NOT NULL,
                             password TEXT NOT NULL)''')
 
+
+# Home redirects to login
 @app.route('/')
 def home():
     return redirect('/login')
 
+
+# Signup route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -58,27 +67,32 @@ def signup():
             return redirect('/signup')
     return render_template('signup.html')
 
+
+# Login route
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        # login logic
-        pass
-    return render_template("login.html", form=form)
+        username = form.username.data
+        password = form.password.data
+
         with sqlite3.connect(DB_NAME) as conn:
             cur = conn.cursor()
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
             user = cur.fetchone()
 
-        if user and check_password_hash(user[3], password):
-            session['user'] = user[1]
-            flash("Login successful!")
+        if user and check_password_hash(user[3], password):  # password is in 4th column
+            session['user'] = user[1]  # store username in session
+            flash("Login successful!", "success")
             return redirect('/dashboard')
         else:
-            flash("Invalid credentials.")
+            flash("Invalid credentials.", "danger")
             return redirect('/login')
-    return render_template('login.html')
 
+    return render_template("login.html", form=form)
+
+
+# Forgot Password
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -99,6 +113,8 @@ def forgot_password():
             return redirect('/forgot-password')
     return render_template('forgot_password.html')
 
+
+# Reset Password
 @app.route('/reset-password/<email>', methods=['GET', 'POST'])
 def reset_password(email):
     if request.method == 'POST':
@@ -116,6 +132,8 @@ def reset_password(email):
             return redirect(url_for('reset_password', email=email))
     return render_template('reset_password.html', email=email)
 
+
+# Dashboard
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
@@ -123,23 +141,26 @@ def dashboard():
         return redirect('/login')
     return render_template('dashboard.html', username=session['user'])
 
+
+# Logout
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("You've logged out successfully.")
+    return redirect('/login')
+
+
+# Email sending mock
 def send_email(to_email, otp):
-    # This is a placeholder. Replace it with actual email logic using SMTP or a library like Flask-Mail.
     print(f"Sending OTP {otp} to {to_email} (mock email)")
 
-from flask_wtf.csrf import CSRFError
 
+# CSRF error handler
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     return render_template('csrf_error.html', reason=e.description), 400
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("You've logged out successfully. See you!")
-    return redirect('/login')
 
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
-
