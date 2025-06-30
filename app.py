@@ -58,12 +58,13 @@ def signup():
             return redirect('/signup')
     return render_template('signup.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        username = request.form['username'].strip()
-        password = request.form['password'].strip()
-
+    form = LoginForm()
+    if form.validate_on_submit():
+        # login logic
+        pass
+    return render_template("login.html", form=form)
         with sqlite3.connect(DB_NAME) as conn:
             cur = conn.cursor()
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
