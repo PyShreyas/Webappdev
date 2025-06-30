@@ -1,12 +1,11 @@
-# secure_web_app/app.py
-
+from forms import LoginForm
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
 import os
 import random
-from forms import LoginForm  # Make sure forms.py exists
+from forms import LoginForm  
 
 from flask_wtf.csrf import CSRFError
 
@@ -80,6 +79,15 @@ def login():
             cur = conn.cursor()
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
             user = cur.fetchone()
+
+        if user and check_password_hash(user[3], password):  # Assuming user[3] is password
+            session['user'] = user[1]  # Assuming user[1] is username
+            flash("Login successful!")
+            return redirect('/dashboard')
+        else:
+            flash("Invalid username or password", "danger")
+
+    return render_template("login.html", form=form)
 
         if user and check_password_hash(user[3], password):  # password is in 4th column
             session['user'] = user[1]  # store username in session
