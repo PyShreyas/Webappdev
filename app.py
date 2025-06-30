@@ -122,12 +122,6 @@ def dashboard():
         return redirect('/login')
     return render_template('dashboard.html', username=session['user'])
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("Logged out.")
-    return redirect('/login')
-
 def send_email(to_email, otp):
     # This is a placeholder. Replace it with actual email logic using SMTP or a library like Flask-Mail.
     print(f"Sending OTP {otp} to {to_email} (mock email)")
