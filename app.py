@@ -132,6 +132,12 @@ def send_email(to_email, otp):
     # This is a placeholder. Replace it with actual email logic using SMTP or a library like Flask-Mail.
     print(f"Sending OTP {otp} to {to_email} (mock email)")
 
+from flask_wtf.csrf import CSRFError
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    return render_template('csrf_error.html', reason=e.description), 400
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
