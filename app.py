@@ -80,14 +80,15 @@ def login():
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
             user = cur.fetchone()
 
-        if user and check_password_hash(user[3], password):  # Assuming user[3] is password
-            session['user'] = user[1]  # Assuming user[1] is username
+        if user and check_password_hash(user[3], password):  # user[3] = password
+            session['user'] = user[1]  # user[1] = username
             flash("Login successful!")
             return redirect('/dashboard')
         else:
             flash("Invalid username or password", "danger")
 
     return render_template("login.html", form=form)
+
 
         if user and check_password_hash(user[3], password):  # password is in 4th column
             session['user'] = user[1]  # store username in session
