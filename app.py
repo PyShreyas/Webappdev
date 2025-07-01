@@ -90,16 +90,6 @@ def login():
     return render_template("login.html", form=form)
 
 
-        if user and check_password_hash(user[3], password):  # password is in 4th column
-            session['user'] = user[1]  # store username in session
-            flash("Login successful!", "success")
-            return redirect('/dashboard')
-        else:
-            flash("Invalid credentials.", "danger")
-            return redirect('/login')
-
-    return render_template("login.html", form=form)
-
 
 # Forgot Password
 @app.route('/forgot-password', methods=['GET', 'POST'])
