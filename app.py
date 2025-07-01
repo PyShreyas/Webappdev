@@ -159,6 +159,24 @@ def send_email(to_email, otp):
 def handle_csrf_error(e):
     return render_template('csrf_error.html', reason=e.description), 400
 
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cur = conn.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Call this when app starts
+init_db()
+
+
 
 if __name__ == '__main__':
     init_db()
